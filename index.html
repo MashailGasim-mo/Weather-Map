@@ -1,0 +1,129 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d6efd">
+  <meta name="description" content="Weather Map - تطبيق تفاعلي للطقس والخرائط والتوقعات الجوية.">
+  <title>Weather Map | الطقس حول العالم</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Weather Map Home">
+        <span class="brand-icon">☀</span>
+        <span>Weather<span class="brand-accent">Map</span></span>
+      </a>
+
+      <div class="header-actions">
+        <button id="languageBtn" class="icon-button" type="button" aria-label="Change language">EN</button>
+        <button id="themeBtn" class="icon-button" type="button" aria-label="Change theme">🌙</button>
+        <button id="unitBtn" class="icon-button" type="button" aria-label="Change temperature unit">°C</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="intro">
+        <p class="eyebrow" data-i18n="eyebrow">اكتشف الطقس حول العالم</p>
+        <h1 data-i18n="heading">الطقس، أينما كنت</h1>
+        <p class="intro-text" data-i18n="intro">كل ما تحتاجه لمعرفة حالة الطقس في مكان واحد.</p>
+      </section>
+
+      <section class="search-panel" aria-label="City search">
+        <form id="searchForm" class="search-form">
+          <span class="search-symbol" aria-hidden="true">⌕</span>
+          <input id="cityInput" type="search" autocomplete="off" required
+            placeholder="ابحثي عن مدينة..." aria-label="Search for a city">
+          <button id="searchBtn" class="primary-button" type="submit" data-i18n="search">بحث</button>
+        </form>
+        <button id="locationBtn" class="location-button" type="button">
+          <span aria-hidden="true">⌖</span>
+          <span data-i18n="myLocation">موقعي الحالي</span>
+        </button>
+      </section>
+
+      <div id="statusMessage" class="status-message" role="status" aria-live="polite"></div>
+
+      <section id="weatherSection" class="weather-section" hidden>
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow" data-i18n="currentWeather">الطقس الحالي</p>
+            <h2 id="cityName">Khartoum</h2>
+            <p id="currentDate" class="muted"></p>
+          </div>
+          <button id="favoriteBtn" class="favorite-button" type="button" aria-label="Add to favorites">☆ <span data-i18n="favorite">إضافة للمفضلة</span></button>
+        </div>
+
+        <article class="weather-hero">
+          <div class="weather-main">
+            <img id="weatherIcon" class="weather-icon" src="https://openweathermap.org/img/wn/01d@2x.png" alt="Weather icon">
+            <div>
+              <div class="temperature-line"><span id="temperature">--</span><span class="degree">°</span></div>
+              <p id="weatherDescription" class="weather-description">--</p>
+              <p class="feels-like"><span data-i18n="feelsLike">المحسوسة</span>: <span id="feelsLike">--</span>°</p>
+            </div>
+          </div>
+          <div class="high-low">
+            <span><span data-i18n="high">العظمى</span> <b id="tempMax">--</b>°</span>
+            <span><span data-i18n="low">الصغرى</span> <b id="tempMin">--</b>°</span>
+          </div>
+        </article>
+
+        <div class="stats-grid">
+          <article class="stat-card"><span class="stat-icon">💧</span><span class="stat-label" data-i18n="humidity">الرطوبة</span><strong id="humidity">--%</strong></article>
+          <article class="stat-card"><span class="stat-icon">💨</span><span class="stat-label" data-i18n="wind">سرعة الرياح</span><strong id="wind">--</strong><small data-i18n="windUnit">متر/ثانية</small></article>
+          <article class="stat-card"><span class="stat-icon">🌡️</span><span class="stat-label" data-i18n="pressure">الضغط الجوي</span><strong id="pressure">--</strong><small>hPa</small></article>
+          <article class="stat-card"><span class="stat-icon">👁️</span><span class="stat-label" data-i18n="visibility">مدى الرؤية</span><strong id="visibility">--</strong><small data-i18n="km">كم</small></article>
+          <article class="stat-card"><span class="stat-icon">☁️</span><span class="stat-label" data-i18n="clouds">الغيوم</span><strong id="clouds">--%</strong></article>
+          <article class="stat-card"><span class="stat-icon">🌅</span><span class="stat-label" data-i18n="sunrise">الشروق</span><strong id="sunrise">--:--</strong></article>
+        </div>
+
+        <section class="content-section">
+          <div class="section-heading">
+            <div><p class="eyebrow" data-i18n="nextHours">خلال الأيام القادمة</p><h2 data-i18n="forecastTitle">توقعات الطقس</h2></div>
+          </div>
+          <div id="forecastGrid" class="forecast-grid"></div>
+        </section>
+
+        <section class="content-section">
+          <div class="section-heading">
+            <div><p class="eyebrow" data-i18n="explore">استكشف المكان</p><h2 data-i18n="mapTitle">خريطة الطقس</h2></div>
+            <button id="mapExpandBtn" class="secondary-button" type="button" data-i18n="mapExpand">عرض الخريطة</button>
+          </div>
+          <div id="weatherMap" class="weather-map" aria-label="Interactive location map"></div>
+          <p class="map-attribution">© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> · <a href="https://leafletjs.com/" target="_blank" rel="noopener">Leaflet</a></p>
+        </section>
+      </section>
+
+      <section class="content-section saved-section">
+        <div class="section-heading"><div><p class="eyebrow" data-i18n="personal">مساحتك الخاصة</p><h2 data-i18n="recentTitle">آخر عمليات البحث</h2></div><button id="clearHistoryBtn" class="text-button" type="button" data-i18n="clear">مسح السجل</button></div>
+        <div id="historyList" class="saved-list"><p class="empty-state" data-i18n="noHistory">ستظهر المدن التي تبحث عنها هنا.</p></div>
+      </section>
+
+      <section class="content-section saved-section">
+        <div class="section-heading"><div><p class="eyebrow" data-i18n="savedPlaces">أماكنك المحفوظة</p><h2 data-i18n="favoritesTitle">المدن المفضلة</h2></div></div>
+        <div id="favoritesList" class="saved-list"><p class="empty-state" data-i18n="noFavorites">أضيفي مدنك المفضلة للوصول إليها بسرعة.</p></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <a class="brand footer-brand" href="#"><span class="brand-icon">☀</span> Weather<span class="brand-accent">Map</span></a>
+      <p data-i18n="footerText">الطقس حول العالم، في تجربة واحدة بسيطة.</p>
+      <p class="footer-small">Weather data: <a href="https://openweathermap.org/" target="_blank" rel="noopener">OpenWeather</a> · Map data: <a href="https://www.openstreetmap.org/" target="_blank" rel="noopener">OpenStreetMap</a></p>
+    </footer>
+  </div>
+
+  <div id="loadingOverlay" class="loading-overlay" hidden>
+    <div class="loader-card"><div class="spinner"></div><p data-i18n="loading">جارٍ جلب بيانات الطقس...</p></div>
+  </div>
+
+  <button id="backToTop" class="back-to-top" type="button" aria-label="Back to top">↑</button>
+</body>
+</html>
